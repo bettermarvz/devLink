@@ -1,33 +1,63 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Header from "../components/header.tsx";
 import ProfileAvatar from "../components/profileAvatar.tsx";
 import EditableField from "../components/editableField.tsx";
-import AddLinkButton from "../components/addLinkButton.tsx";
-import NewLinkForm from "../components/newLinkForm.tsx";
+import CustomButton from "../components/addLinkButton.tsx";
+import AddLinkForm from "../components/addLinkForm.tsx";
+import {
+  getCurrentUser,
+  getLinks,
+  saveProfile,
+  useLinks,
+} from "@/lib/supabaseClient.ts";
+import { User } from "@supabase/supabase-js";
+import LinkItem from "../components/linkItem.tsx";
 
-export default function App() {
-  const [name, setName] = useState("Your name");
-  const [bio, setBio] = useState("Add your Bio");
+const Dashboard = () => {
+  const { linkData, isLoading, mutateLinks } = useLinks();
+
+  console.log(linkData, "user in dashboard");
+  const [currentUser, setCurrentUser] = useState<{
+    user: User | undefined;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    profileData: any;
+  } | null>(null);
+
   const [editingName, setEditingName] = useState(false);
   const [editingBio, setEditingBio] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
 
-  console.log(editingName, editingBio);
+  useEffect(() => {
+    const fetchUser = async () => {
+      const user = await getCurrentUser();
+      setCurrentUser(user);
+    };
+    fetchUser();
+  }, []);
 
   const handleNameSave = (newName: string) => {
-    setName(newName || "Your name");
     setEditingName(false);
+    console.log("saving name", newName);
+    saveProfile(newName, currentUser?.profileData?.bio ?? "");
+    window.location.reload();
   };
 
   const handleBioSave = (newBio: string) => {
-    setBio(newBio || "Add your Bio");
     setEditingBio(false);
+    saveProfile(currentUser?.profileData?.name, newBio ?? "");
+    window.location.reload();
   };
 
   const handleAddLink = () => {
     // Placeholder for add link functionality
-    alert("Add Link functionality would be implemented here");
+    setIsAdding(true);
+  };
+
+  const handleLinkAdded = async () => {
+    setIsAdding(false); // Optionally close the form
+    mutateLinks(); // Refresh the links list
   };
 
   return (
@@ -51,7 +81,7 @@ export default function App() {
         {/* Profile Info */}
         <div className="box-border content-stretch flex flex-col gap-1.5 items-center justify-start p-0 relative shrink-0 w-full">
           <EditableField
-            value={name}
+            value={currentUser?.profileData?.name || ""}
             placeholder="Your name"
             isEditing={editingName}
             onEdit={() => setEditingName(true)}
@@ -59,9 +89,10 @@ export default function App() {
             onCancel={() => setEditingName(false)}
             fontSize="18px"
             fontWeight="semibold"
+            editable
           />
           <EditableField
-            value={bio}
+            value={currentUser?.profileData?.bio || ""}
             placeholder="Add your Bio"
             isEditing={editingBio}
             onEdit={() => setEditingBio(true)}
@@ -69,16 +100,33 @@ export default function App() {
             onCancel={() => setEditingBio(false)}
             fontSize="14px"
             fontWeight="normal"
+            editable
           />
         </div>
 
         {/* Add Link Button */}
         <div className="box-border content-stretch flex flex-col gap-4 items-start justify-start p-0 relative shrink-0 w-full">
-          {/* New Link Form  */}
-          <NewLinkForm />
-          <AddLinkButton onClick={handleAddLink} />
+          {linkData &&
+            linkData?.length > 0 &&
+            linkData.map((i, y) => (
+              <div className="w-full" key={y}>
+                <LinkItem title={i.platform} isUser={!!currentUser} />
+              </div>
+            ))}
+          {isAdding ? (
+            <>
+              <AddLinkForm onLinkAdded={handleLinkAdded} />
+            </>
+          ) : (
+            linkData &&
+            linkData?.length < 5 && (
+              <CustomButton label="Add Link" onClick={handleAddLink} />
+            )
+          )}
         </div>
       </div>
     </div>
   );
-}
+};
+
+export default Dashboard;
