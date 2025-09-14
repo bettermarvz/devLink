@@ -14,25 +14,31 @@ const EditableField = ({
   onCancel,
   fontSize = "18px",
   fontWeight = "semibold",
+  editable = false,
 }: {
   value: string;
   placeholder: string;
   isEditing: boolean;
-  onEdit: () => void;
-  onSave: (name: string) => void;
-  onCancel: () => void;
-  fontSize: string;
-  fontWeight: string;
+  onEdit?: () => void;
+  onSave?: (name: string) => void;
+  onCancel?: () => void;
+  fontSize?: string;
+  fontWeight?: string;
+  editable?: boolean;
 }) => {
   const [editValue, setEditValue] = useState(value);
 
   const handleSave = () => {
-    onSave(editValue);
+    if (onSave) {
+      onSave(editValue);
+    }
   };
 
   const handleCancel = () => {
     setEditValue(value);
-    onCancel();
+    if (onCancel) {
+      onCancel();
+    }
   };
 
   if (isEditing) {
@@ -65,7 +71,6 @@ const EditableField = ({
 
   return (
     <div className="box-border content-stretch flex gap-4 items-center justify-center p-0 relative shrink-0 w-full">
-      <div className="shrink-0 size-3.5" />
       <div
         className={`font-['Inter:${
           fontWeight === "semibold" ? "Semi_Bold" : "Regular"
@@ -76,12 +81,14 @@ const EditableField = ({
           {value || placeholder}
         </p>
       </div>
-      <button
-        onClick={onEdit}
-        className="relative shrink-0 size-3.5 p-0 bg-transparent border-none cursor-pointer"
-      >
-        <Edit size={14} color="#343434" />
-      </button>
+      {editable && (
+        <button
+          onClick={onEdit}
+          className="relative shrink-0 size-3.5 p-0 bg-transparent border-none cursor-pointer"
+        >
+          <Edit size={14} color="#343434" />
+        </button>
+      )}
     </div>
   );
 };
