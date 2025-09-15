@@ -74,7 +74,7 @@ const EditableField = ({
       <div
         className={`font-['Inter:${
           fontWeight === "semibold" ? "Semi_Bold" : "Regular"
-        }',_sans-serif] font-${fontWeight} leading-[0] not-italic relative shrink-0 text-[#343434] text-center text-nowrap`}
+        }',_sans-serif] font-${fontWeight} leading-[0] not-italic relative shrink-0 text-white text-center text-nowrap`}
         style={{ fontSize }}
       >
         <p className="block leading-[normal] whitespace-pre">
@@ -86,7 +86,7 @@ const EditableField = ({
           onClick={onEdit}
           className="relative shrink-0 size-3.5 p-0 bg-transparent border-none cursor-pointer"
         >
-          <Edit size={14} color="#343434" />
+          <Edit size={14} color="#fff" />
         </button>
       )}
     </div>

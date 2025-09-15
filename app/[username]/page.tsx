@@ -4,19 +4,27 @@ import {
   getUserDataByUsername,
   useCurrentUser,
   useUserByUsername,
+  useViewUserLinks,
 } from "@/lib/supabaseClient";
 import React from "react";
 import { usePathname } from "next/navigation";
 import Header from "../components/header";
 import ProfileAvatar from "../components/profileAvatar";
 import EditableField from "../components/editableField";
+import LinkItem from "../components/linkItem";
 
 const UserProfile = () => {
-  const pathname = usePathname().substring(1); // remove leading slash
-  const { userByUsernameData, isLoading } = useUserByUsername(pathname);
-  const { currentUserData, mutateCurrentUser } = useCurrentUser();
+  const usernameFromPath = usePathname().substring(1); // remove leading slash
+  const { userByUsernameData, isLoading } = useUserByUsername(usernameFromPath);
+  const { currentUserData } = useCurrentUser();
+  const { linkData } = useViewUserLinks(usernameFromPath);
 
-  if (currentUserData && currentUserData?.profileData?.username === pathname) {
+  console.log(linkData, "linkData in user profile");
+
+  if (
+    currentUserData &&
+    currentUserData?.profileData?.username === usernameFromPath
+  ) {
     window.location.href = "/dashboard";
   }
 
@@ -24,19 +32,16 @@ const UserProfile = () => {
     window.location.href = "/login";
   }
   console.log(userByUsernameData, "userByUsernameData");
-  const profileData = getUserDataByUsername(pathname);
+  const profileData = getUserDataByUsername(usernameFromPath);
 
-  console.log(profileData, "profileData", pathname, currentUserData);
+  console.log(profileData, "profileData", usernameFromPath, currentUserData);
 
   return isLoading ? (
     <div>Loading...</div>
   ) : (
-    <div
-      className="bg-[#4fa69b] relative size-full min-h-screen"
-      data-name="Profile"
-    >
+    <div className=" relative size-full min-h-screen" data-name="Profile">
       {/* Background gradient */}
-      <div className="absolute bg-[#6ee0ff] h-full w-full left-0 top-0" />
+      <div className="absolute bg-primary h-full w-full left-0 top-0" />
 
       {/* Header */}
       <div className="absolute box-border content-stretch flex items-center justify-between p-4 top-[43px] left-0 right-0 mx-auto max-w-md">
@@ -67,25 +72,15 @@ const UserProfile = () => {
         </div>
 
         {/* Add Link Button */}
-        {/* <div className="box-border content-stretch flex flex-col gap-4 items-start justify-start p-0 relative shrink-0 w-full">
+        <div className="box-border content-stretch flex flex-col gap-4 items-start justify-start p-0 relative shrink-0 w-full">
           {linkData &&
             linkData?.length > 0 &&
             linkData.map((i, y) => (
               <div className="w-full" key={y}>
-                <LinkItem title={i.platform} isUser={!!currentUser} />
+                <LinkItem url={i.url} title={i.platform} isUser viewOnly />
               </div>
             ))}
-          {isAdding ? (
-            <>
-              <AddLinkForm onLinkAdded={handleLinkAdded} />
-            </>
-          ) : (
-            linkData &&
-            linkData?.length < 5 && (
-              <CustomButton label="Add Link" onClick={handleAddLink} />
-            )
-          )}
-        </div> */}
+        </div>
       </div>
     </div>
   );
