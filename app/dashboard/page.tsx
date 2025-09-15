@@ -6,17 +6,12 @@ import ProfileAvatar from "../components/profileAvatar.tsx";
 import EditableField from "../components/editableField.tsx";
 import CustomButton from "../components/addLinkButton.tsx";
 import AddLinkForm from "../components/addLinkForm.tsx";
-import {
-  getCurrentUser,
-  getLinks,
-  saveProfile,
-  useLinks,
-} from "@/lib/supabaseClient.ts";
+import { getCurrentUser, saveProfile, useLinks } from "@/lib/supabaseClient.ts";
 import { User } from "@supabase/supabase-js";
 import LinkItem from "../components/linkItem.tsx";
 
 const Dashboard = () => {
-  const { linkData, isLoading, mutateLinks } = useLinks();
+  const { linkData, mutateLinks } = useLinks();
 
   console.log(linkData, "user in dashboard");
   const [currentUser, setCurrentUser] = useState<{
@@ -62,11 +57,11 @@ const Dashboard = () => {
 
   return (
     <div
-      className="bg-[#4fa69b] relative size-full min-h-screen"
+      className="bg-[#6ee0ff] relative size-full min-h-screen"
       data-name="Profile"
     >
       {/* Background gradient */}
-      <div className="absolute bg-[#6ee0ff] h-full w-full left-0 top-0" />
+      <div className="absolute bg-primary h-full w-full left-0 top-0" />
 
       {/* Header */}
       <div className="absolute box-border content-stretch flex items-center justify-between p-4 top-[43px] left-0 right-0 mx-auto max-w-md">
@@ -110,12 +105,19 @@ const Dashboard = () => {
             linkData?.length > 0 &&
             linkData.map((i, y) => (
               <div className="w-full" key={y}>
-                <LinkItem title={i.platform} isUser={!!currentUser} />
+                <LinkItem
+                  url={i.url}
+                  title={i.platform}
+                  isUser={!!currentUser}
+                />
               </div>
             ))}
           {isAdding ? (
             <>
-              <AddLinkForm onLinkAdded={handleLinkAdded} />
+              <AddLinkForm
+                onLinkAdded={handleLinkAdded}
+                closeHandler={setIsAdding}
+              />
             </>
           ) : (
             linkData &&

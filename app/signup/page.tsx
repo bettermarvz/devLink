@@ -3,8 +3,9 @@
 import Form from "next/form";
 import React from "react";
 import CustomButton from "../components/addLinkButton";
-import { isLoggedIn, signUp } from "@/lib/supabaseClient";
+import { signUp } from "@/lib/supabaseClient";
 import { Input } from "@/components/ui/input";
+import Link from "next/link";
 
 const SignUp = () => {
   //   const user  = isLoggedIn();
@@ -33,15 +34,10 @@ const SignUp = () => {
       <div className="flex flex-col items-center text-center max-w-xs w-full">
         {/* Logo */}
         <div className="box-border content-stretch flex gap-1.5 items-center justify-start p-0 relative shrink-0">
-          <div className="font-['Inter:Black',_sans-serif] font-black leading-[0] not-italic relative shrink-0 text-[#343434] text-[20px] text-center text-nowrap">
+          <div className="font-['Inter:Black',_sans-serif] font-black leading-[0] not-italic relative shrink-0 text-white text-4xl text-center text-nowrap">
             <p className="block leading-[normal] whitespace-pre">DevLink</p>
           </div>
         </div>
-
-        {/* Title */}
-        <h1 className="text-white text-3xl font-bold mb-2">
-          Welcome to DevLink
-        </h1>
 
         {/* Subtitle */}
         <p className="text-white text-2xl mb-10">
@@ -49,16 +45,40 @@ const SignUp = () => {
         </p>
 
         <Form action={handleSignUp} className="flex flex-col gap-2 w-full">
-          <Input type="email" name="email" placeholder="Email" />
-          <Input type="text" name="username" placeholder="Username" />
-          <Input type="password" name="password" placeholder="Password" />
+          <Input
+            type="email"
+            name="email"
+            placeholder="Email"
+            className="bg-white border-0"
+          />
+          <Input
+            type="text"
+            name="username"
+            placeholder="Username"
+            className="bg-white border-0"
+          />
+          <Input
+            type="password"
+            name="password"
+            placeholder="Password"
+            className="bg-white border-0"
+          />
           <Input
             type="password"
             name="confirmPassword"
             placeholder="Confirm password"
+            className="bg-white border-0"
           />
-          <CustomButton type="submit" label="SignUp" />
+          <CustomButton type="submit" label="Sign Up" />
         </Form>
+
+        {/* login */}
+        <p className="text-white mt-10">
+          Already have an account?{" "}
+          <Link href="/login" className="underline">
+            Log in
+          </Link>
+        </p>
       </div>
     </div>
   );

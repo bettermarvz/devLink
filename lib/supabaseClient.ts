@@ -1,13 +1,7 @@
-import { createClient } from "@supabase/supabase-js";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import { link } from "fs";
-import { use } from "react";
-import useSWR, { mutate } from "swr";
+import useSWR from "swr";
 import { notFound } from "next/navigation";
 
-// const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
-// const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string;
-// const supabase = createClient(supabaseUrl, supabaseKey);
 const supabase = createClientComponentClient();
 
 export const signUp = async (payload: {
@@ -29,7 +23,7 @@ export const signUp = async (payload: {
 };
 
 export const signIn = async (payload: { email: string; password: string }) => {
-  const { data, error } = await supabase.auth.signInWithPassword(payload);
+  const { data } = await supabase.auth.signInWithPassword(payload);
   return data;
 };
 
@@ -50,7 +44,7 @@ export const getCurrentUser = async () => {
   const user = session?.user;
   let profileData;
   if (user) {
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from("profiles")
       .select("*")
       .eq("id", user.id)
@@ -71,7 +65,7 @@ export const saveProfile = async (name: string, bio: string) => {
   } = await supabase.auth.getUser();
 
   if (user) {
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from("profiles")
       .update([
         {
@@ -94,12 +88,11 @@ export const saveLink = async (platform: string, url: string) => {
   } = await supabase.auth.getUser();
 
   if (user) {
-    const { data, error } = await supabase.from("links").upsert([
+    await supabase.from("links").upsert([
       {
-        profile_id: user.id, // links to auth.users
+        profile_id: user.id,
         platform,
         url,
-        // social_links: {},
       },
     ]);
   }
@@ -114,12 +107,11 @@ export const getLinks = async () => {
   const user = session?.user;
   let links;
   if (user) {
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from("links")
       .select("platform, url")
       .eq("profile_id", user.id);
     links = data;
-    console.log(session, data);
   }
 
   if (sessionError || !session) {
@@ -129,10 +121,30 @@ export const getLinks = async () => {
 
   return links;
 };
+
+export const getUserLinksByUsername = async (username: string) => {
+  let links;
+  const theId = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("username", username)
+    .single();
+
+  if (theId.data?.id) {
+    const { data } = await supabase
+      .from("links")
+      .select("platform, url")
+      .eq("profile_id", theId.data?.id);
+    links = data;
+  }
+
+  return { links };
+};
+
 export const getUserDataByUsername = async (username: string) => {
   let profileData;
   if (username) {
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from("profiles")
       .select("*")
       .eq("username", username)
@@ -150,6 +162,20 @@ export const useLinks = () => {
 
   return {
     linkData: data,
+    isLoading,
+    isError: error,
+    mutateLinks: mutate,
+  };
+};
+
+export const useViewUserLinks = (username: string) => {
+  const { data, error, isLoading, mutate } = useSWR(
+    username ? ["links", username] : null, // null disables fetch if no username
+    ([, username]) => getUserLinksByUsername(username)
+  );
+
+  return {
+    linkData: data?.links ?? null,
     isLoading,
     isError: error,
     mutateLinks: mutate,
