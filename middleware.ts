@@ -6,12 +6,21 @@ import { createMiddlewareClient } from "@supabase/auth-helpers-nextjs";
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next();
 
-  // get the pathname
-  const pathname = req.nextUrl.pathname;
-  console.log(pathname, "1111111111111111111111pathname", req);
-
   // ✅ Use Supabase middleware client (reads cookies from req/res)
   const supabase = createMiddlewareClient({ req, res });
+
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  if (session?.user) {
+    // redirect to dashboard if not, redirect to login
+    if (req.nextUrl.pathname === "/") {
+      return NextResponse.redirect(new URL("/dashboard", req.url));
+    }
+  } else if (!session?.user && req.nextUrl.pathname === "/") {
+    return NextResponse.redirect(new URL("/login", req.url));
+  }
 
   const {
     data: { user },
