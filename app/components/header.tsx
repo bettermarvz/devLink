@@ -90,10 +90,9 @@ const Header = () => {
   const { currentUserData } = useCurrentUser();
   const router = useRouter();
   const handleSignOut = async () => {
-    console.log("hello");
     try {
       await signOut();
-      router.replace("/dashboard");
+      router.replace("/login");
     } catch (error) {
       console.log(error);
     }
