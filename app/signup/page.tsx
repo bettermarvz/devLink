@@ -8,12 +8,6 @@ import { Input } from "@/components/ui/input";
 import Link from "next/link";
 
 const SignUp = () => {
-  //   const user  = isLoggedIn();
-
-  //   if (user) {
-  //     console.log(user);
-  //   }
-
   const handleSignUp = async (data: FormData) => {
     const email = data.get("email") as string;
     const password = data.get("password") as string;

@@ -1,5 +1,5 @@
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import useSWR from "swr";
+import useSWR, { mutate } from "swr";
 import { notFound } from "next/navigation";
 
 const supabase = createClientComponentClient();
@@ -95,6 +95,7 @@ export const saveLink = async (platform: string, url: string) => {
         url,
       },
     ]);
+    mutate("links");
   }
 };
 
@@ -109,7 +110,7 @@ export const getLinks = async () => {
   if (user) {
     const { data } = await supabase
       .from("links")
-      .select("platform, url")
+      .select("platform, url, id")
       .eq("profile_id", user.id);
     links = data;
   }
@@ -153,6 +154,49 @@ export const getUserDataByUsername = async (username: string) => {
   }
 
   return { profileData };
+};
+
+export async function uploadAvatar(file: File) {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  const user = session?.user;
+  const fileExt = file.name.split(".").pop();
+  const fileName = `${user?.id}.${fileExt}`;
+  const filePath = `${fileName}`;
+
+  // Upload file to Supabase Storage
+  const { error } = await supabase.storage
+    .from("devlink")
+    .upload(filePath, file, { upsert: true });
+
+  if (error) throw error;
+
+  // Get public URL
+  const { data } = supabase.storage.from("devlink").getPublicUrl(filePath);
+
+  // Save public URL in profiles table
+  const { error: updateError } = await supabase
+    .from("profiles")
+    .update({ avatar_url: data.publicUrl })
+    .eq("id", user?.id);
+
+  if (updateError) throw updateError;
+
+  return data.publicUrl;
+}
+
+//delete link
+export const deleteLink = async (linkId: string) => {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (user) {
+    const { error } = await supabase.from("links").delete().eq("id", linkId);
+    if (error) throw error;
+    mutate("links");
+  }
 };
 
 ////// SWRs //////
