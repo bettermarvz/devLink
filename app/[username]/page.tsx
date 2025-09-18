@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  getUserDataByUsername,
   useCurrentUser,
   useUserByUsername,
   useViewUserLinks,
@@ -19,8 +18,6 @@ const UserProfile = () => {
   const { currentUserData } = useCurrentUser();
   const { linkData } = useViewUserLinks(usernameFromPath);
 
-  console.log(linkData, "linkData in user profile");
-
   if (
     currentUserData &&
     currentUserData?.profileData?.username === usernameFromPath
@@ -31,10 +28,6 @@ const UserProfile = () => {
   if (userByUsernameData?.profileData === null) {
     window.location.href = "/login";
   }
-  console.log(userByUsernameData, "userByUsernameData");
-  const profileData = getUserDataByUsername(usernameFromPath);
-
-  console.log(profileData, "profileData", usernameFromPath, currentUserData);
 
   return isLoading ? (
     <div>Loading...</div>
@@ -51,7 +44,9 @@ const UserProfile = () => {
       {/* Main content */}
       <div className="absolute box-border content-stretch flex flex-col gap-[45px] items-center justify-start left-1/2 transform -translate-x-1/2 p-4 w-full max-w-[299px] top-1/2 -translate-y-1/2">
         {/* Profile Avatar */}
-        <ProfileAvatar />
+        <ProfileAvatar
+          avatar_url={userByUsernameData?.profileData.avatar_url}
+        />
 
         {/* Profile Info */}
         <div className="box-border content-stretch flex flex-col gap-1.5 items-center justify-start p-0 relative shrink-0 w-full">

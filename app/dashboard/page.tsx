@@ -1,48 +1,38 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Header from "../components/header.tsx";
 import ProfileAvatar from "../components/profileAvatar.tsx";
 import EditableField from "../components/editableField.tsx";
 import CustomButton from "../components/addLinkButton.tsx";
 import AddLinkForm from "../components/addLinkForm.tsx";
-import { getCurrentUser, saveProfile, useLinks } from "@/lib/supabaseClient.ts";
-import { User } from "@supabase/supabase-js";
+import {
+  deleteLink,
+  saveProfile,
+  useCurrentUser,
+  useLinks,
+} from "@/lib/supabaseClient.ts";
+
 import LinkItem from "../components/linkItem.tsx";
 
 const Dashboard = () => {
+  const { currentUserData, mutateCurrentUser } = useCurrentUser();
   const { linkData, mutateLinks } = useLinks();
-
-  console.log(linkData, "user in dashboard");
-  const [currentUser, setCurrentUser] = useState<{
-    user: User | undefined;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    profileData: any;
-  } | null>(null);
 
   const [editingName, setEditingName] = useState(false);
   const [editingBio, setEditingBio] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      const user = await getCurrentUser();
-      setCurrentUser(user);
-    };
-    fetchUser();
-  }, []);
-
   const handleNameSave = (newName: string) => {
     setEditingName(false);
-    console.log("saving name", newName);
-    saveProfile(newName, currentUser?.profileData?.bio ?? "");
-    window.location.reload();
+    saveProfile(newName, currentUserData?.profileData?.bio ?? "");
+    mutateCurrentUser();
   };
 
   const handleBioSave = (newBio: string) => {
     setEditingBio(false);
-    saveProfile(currentUser?.profileData?.name, newBio ?? "");
-    window.location.reload();
+    saveProfile(currentUserData?.profileData?.name, newBio ?? "");
+    mutateCurrentUser();
   };
 
   const handleAddLink = () => {
@@ -53,6 +43,13 @@ const Dashboard = () => {
   const handleLinkAdded = async () => {
     setIsAdding(false); // Optionally close the form
     mutateLinks(); // Refresh the links list
+    // window.location.reload();
+    // mutateCurrentUser();
+  };
+
+  const handleDelete = (id: string) => {
+    deleteLink(id);
+    mutateLinks();
   };
 
   return (
@@ -71,12 +68,12 @@ const Dashboard = () => {
       {/* Main content */}
       <div className="absolute box-border content-stretch flex flex-col gap-[45px] items-center justify-start left-1/2 transform -translate-x-1/2 p-4 w-full max-w-[299px] top-1/2 -translate-y-1/2">
         {/* Profile Avatar */}
-        <ProfileAvatar />
+        <ProfileAvatar avatar_url={currentUserData?.profileData.avatar_url} />
 
         {/* Profile Info */}
         <div className="box-border content-stretch flex flex-col gap-1.5 items-center justify-start p-0 relative shrink-0 w-full">
           <EditableField
-            value={currentUser?.profileData?.name || ""}
+            value={currentUserData?.profileData?.name || ""}
             placeholder="Your name"
             isEditing={editingName}
             onEdit={() => setEditingName(true)}
@@ -87,7 +84,7 @@ const Dashboard = () => {
             editable
           />
           <EditableField
-            value={currentUser?.profileData?.bio || ""}
+            value={currentUserData?.profileData?.bio || ""}
             placeholder="Add your Bio"
             isEditing={editingBio}
             onEdit={() => setEditingBio(true)}
@@ -108,7 +105,8 @@ const Dashboard = () => {
                 <LinkItem
                   url={i.url}
                   title={i.platform}
-                  isUser={!!currentUser}
+                  isUser={!!currentUserData}
+                  deleteLink={() => handleDelete(i.id)}
                 />
               </div>
             ))}

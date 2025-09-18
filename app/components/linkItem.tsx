@@ -1,3 +1,5 @@
+import { deleteLink } from "@/lib/supabaseClient";
+import { link } from "fs";
 import { ChevronRight, Pencil, X } from "lucide-react";
 import Link from "next/link";
 import React from "react";
@@ -7,11 +9,13 @@ const LinkItem = ({
   url,
   isUser,
   viewOnly = false,
+  deleteLink,
 }: {
   title: string;
   url: string;
   isUser: boolean;
   viewOnly?: boolean;
+  deleteLink: () => void;
 }) => {
   const DefaultView = () => (
     <div className="flex bg-white w-full justify-between items-center border p-2 px-4 rounded-full">
@@ -25,10 +29,10 @@ const LinkItem = ({
         <p className=" capitalize">{title}</p>
 
         <div className="flex justify-center items-center gap-2">
-          <button type="button" className="cursor-pointer">
+          {/* <button type="button" className="cursor-pointer">
             <Pencil strokeWidth={1.5} className="w-[14px]" />
-          </button>
-          <button type="button" className="cursor-pointer">
+          </button> */}
+          <button type="button" className="cursor-pointer" onClick={deleteLink}>
             <X strokeWidth={1.5} className="w-[14px]" />
           </button>
         </div>
