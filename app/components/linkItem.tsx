@@ -15,7 +15,7 @@ const LinkItem = ({
   url: string;
   isUser: boolean;
   viewOnly?: boolean;
-  deleteLink: () => void;
+  deleteLink?: () => void;
 }) => {
   const DefaultView = () => (
     <div className="flex bg-white w-full justify-between items-center border p-2 px-4 rounded-full">
