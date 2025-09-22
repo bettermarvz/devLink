@@ -14,12 +14,13 @@ export const signUp = async (payload: {
 
   // Once signed up, insert into `profiles`
   if (data.user) {
-    await supabase.from("profiles").insert({
+    const { error: profileError } = await supabase.from("profiles").insert({
       id: data.user.id, // match with auth.users.id
       username: payload.username,
     });
+    if (profileError) throw profileError;
   }
-  return data;
+  return { data };
 };
 
 export const signIn = async (payload: { email: string; password: string }) => {
